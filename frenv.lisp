@@ -27,8 +27,11 @@
 (error "Get this written")
 ;; It seems highly probable that it will involve usocket and
 ;; bordeaux-threads
+(asdf:oos 'asdf:load-op '#:bordeaux-threads)
+(asdf:oos 'asdf:load-op '#:usocket)
+
+
 
 ;;; Kick off the windowing system
 (error "Do that")
-
 
