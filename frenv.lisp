@@ -27,6 +27,7 @@
 (error "Get this written")
 ;; It seems highly probable that it will involve usocket and
 ;; bordeaux-threads
+;; FIXME: These should be listed as requirements in the ASD.
 (asdf:oos 'asdf:load-op '#:bordeaux-threads)
 (asdf:oos 'asdf:load-op '#:usocket)
 
