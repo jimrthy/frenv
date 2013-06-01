@@ -1,5 +1,6 @@
 ;;;; package.lisp
 
 (defpackage #:frenv
-  (:use #:cl))
+  (:use #:cl #:bordeaux-threads #:cl-glfw3)
+  (:export #:stupid-get-input))
 
