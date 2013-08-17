@@ -14,6 +14,7 @@
 (println "Just accept that multiple windows really mean multiple threads")
 ;; OTOH...they don't. Especially since rendering isn't thread-safe.
 ;; The glfw3 docs are full of functions that must be called from the main thread.
+;; OTOH: shouldn't ASDF and packaging take care of this for me?
 (asdf:oos 'asdf:load-op '#:bordeaux-threads)
 
 (defun draw ()
@@ -29,6 +30,7 @@
     (format t "~A" msg))
   (glfw:initialize))
 
+;; Cheap way for caller to wait on stupid-loop to exit.
 (defparameter *exited* ())
 (defun stupid-loop ()
   "Really just because I have to start somewhere"
