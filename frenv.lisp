@@ -63,7 +63,20 @@ engine, or whatever.
 One point that seems important to keep in mind:
 User input is extremely important here. As is feedback from the
 server: maybe the screen should flash red because the player just
-got shot.")
+got shot.
+
+=> this should also take a sequence of messages intended for the
+model as a parameter. WTF would this be tracking which messages
+a model cares about?
+
+alt: stream messages to the models as they arrive. Then they
+update their own state appropriately. This seems like a bad
+idea.
+
+alt2: Stream messages to the model handler. It asks the model
+for its reaction to the message, then replaces the model with 
+the new state. This sounds ridiculous, but it's really the safest
+option I've run across so far.")
 
 (defun animate ()
   ;; this entire idea is wrong.
@@ -120,9 +133,13 @@ got shot.")
 (defparameter *graphics-thread* nil)
 (defun start ()
   "Kick off the windowing system."
+  ;; If we're restarting, the lock may or may not be nil.
   (setf *graphics-lock* (bordeaux-threads:make-lock "Everybody's favorite renderer"))
-  ;; Run stupid-loop in a second thread.
-  (setf *graphics-thread* (bordeaux-threads:makethread stupid-loop :name "graphics")))
+  ;; This should really be redundant...we should most definitely be in a single-threaded
+  ;; environment here above everywhere else. But just to be safe:
+  (bordeaux-threads:with-lock-held (*graphics-lock*)
+    ;; Run stupid-loop in a second thread.
+    (setf *graphics-thread* (bordeaux-threads:makethread stupid-loop :name "graphics"))))
 
 (defun stop ()
   ;; Nope. Does not work at all.
@@ -131,9 +148,8 @@ got shot.")
   (let ((lock *graphics-lock*))
     (set-window-should-close)
     (when *graphics-thread*
-      (bordeaux-threads:join-thread *graphics-thread*))
-    ;; Reset so start can rebuild...redundant, but I'm in a pedantic mood.
-    (setf *graphics-lock* nil)
+      (bordeaux-threads:join-thread *graphics-thread*)
+      (setf *graphics-thread* nil))
     (release-lock *graphics-lock*)))
 
 ;;; This next piece is absolutely horrible and should never
@@ -142,6 +158,7 @@ got shot.")
 ;;; interaction, even if it's
 ;;; going to be obsoleted and thrown out the window instantly.
 (defun stupid-get-input (&optional prompt)
+  (error "No, really. Move forward.")
   (format t "~A " (if prompt
 		      prompt
 		      "=> "))
