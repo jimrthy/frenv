@@ -3,8 +3,8 @@
 (in-package #:frenv)
 
 (require '#:asdf)
-(println "Get cl-glfw3 working and integrated")
-#|(asdf:oos 'asdf:load-op '#:cl-glfw3)|#
+;;(println "Get cl-glfw3 working and integrated")
+(asdf:oos 'asdf:load-op '#:cl-glfw3)
 
 ;; This next point's debatable.
 ;; I want to be able to spawn a window from a REPL and keep using the REPL.
@@ -17,13 +17,21 @@
 ;; OTOH: shouldn't ASDF and packaging take care of this for me?
 (asdf:oos 'asdf:load-op '#:bordeaux-threads)
 
-;; The top-level windows. It's tempting to filter out the ones that are iconified,
+;;; The top-level aspects of everything interesting.
+;;; From an MVC perspective, these represent both the models and the views.
+;;; It's important to remember that there could easily be many views
+;;; associated with any given model.
+;;; OTOH, it's a mistake to complect those concepts.
+;; It's tempting to filter out the ones that are iconified,
 ;; but that isn't really fair. It's totally possible that they're generating stuff
 ;; that needs to be drawn (as painful as it is, think about the way things work in
 ;; windos 8).
 ;; Let the window manager do the filtering, until/unless it actually needs to be
 ;; optimized at this level.
-(defparameter *views*)
+(defparameter *realities* ())
+
+(defgeneric render (renderer view)
+  :documentation "Renderer generates a stream of OpenGL commands to represent view.")
 
 (defun draw ()
   ;; It's more than a little dumb to just loop through all top level
@@ -35,11 +43,13 @@
   ;; draw. (Why isn't there? At least for power users?)
   ;; If nothing else, every alternative that comes to mind qualifies
   ;; as premature optimization.
-  (dolist (view *views*)
+  (dolist (view (map 'list #'view *realities*))
+    ;; The view really doesn't know whether it's visible or not.
     (let ((renderer (driver view))
 	  (ctx (context view)))
       ;; I know I started writing alternatives. Why does this not match?
-      (error "Write this"))))
+      (glfw:make-context-current ctx)
+      (render renderer view))))
 
 (defun animate ()
   ;; this entire idea is wrong.
