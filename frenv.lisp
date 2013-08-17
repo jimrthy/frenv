@@ -17,10 +17,36 @@
 ;; OTOH: shouldn't ASDF and packaging take care of this for me?
 (asdf:oos 'asdf:load-op '#:bordeaux-threads)
 
+;; The top-level windows. It's tempting to filter out the ones that are iconified,
+;; but that isn't really fair. It's totally possible that they're generating stuff
+;; that needs to be drawn (as painful as it is, think about the way things work in
+;; windos 8).
+;; Let the window manager do the filtering, until/unless it actually needs to be
+;; optimized at this level.
+(defparameter *views*)
+
 (defun draw ()
-  (error "Write this"))
+  ;; It's more than a little dumb to just loop through all top level
+  ;; windows this way. Some don't need to be drawn. Others only need
+  ;; to draw their icons. In a lot of ways, this is trying to replace
+  ;; the window manager and do its job.
+  ;; In other ways...the WM shouldn't be dictating how this process
+  ;; draws its sub-windows. Even if there isn't any main window to
+  ;; draw. (Why isn't there? At least for power users?)
+  ;; If nothing else, every alternative that comes to mind qualifies
+  ;; as premature optimization.
+  (dolist (view *views*)
+    (let ((renderer (driver view))
+	  (ctx (context view)))
+      ;; I know I started writing alternatives. Why does this not match?
+      (error "Write this"))))
 
 (defun animate ()
+  ;; this entire idea is wrong.
+  ;; There *should* be a timer to let various pieces know that it's time
+  ;; to take a step.
+  ;; User input provides the same sort of motivation.
+  ;; There's no real justification for this sort of function at this level.
   (error "Write this"))
 
 (defun start ()
@@ -31,6 +57,8 @@
   (glfw:initialize))
 
 ;; Cheap way for caller to wait on stupid-loop to exit.
+;; Seriously. The entire thing is dumb. It just all happens
+;; to qualify as "things I've managed to accomplish today"
 (defparameter *exited* ())
 (defun stupid-loop ()
   "Really just because I have to start somewhere"
