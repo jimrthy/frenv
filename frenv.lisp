@@ -27,7 +27,7 @@
 (defparameter *views* ())
 
 (defgeneric render (renderer view)
-  :documentation "Renderer generates a stream of OpenGL commands to represent view.")
+  (:documentation "Renderer generates a stream of OpenGL commands to represent view."))
 
 (defun draw ()
   ;; It's more than a little dumb to just loop through all top level
@@ -55,7 +55,7 @@
 (defparameter *models* ())
 
 (defgeneric advance (model)
-  :documentation "Advance a model's state by one 'tick.'
+  (:documentation "Advance a model's state by one 'tick.'
 This could mean updating a rotation, advancing a lerp, switching
 a button's texture because of a mouse click, stepping a physics
 engine, or whatever.
@@ -76,7 +76,7 @@ idea.
 alt2: Stream messages to the model handler. It asks the model
 for its reaction to the message, then replaces the model with 
 the new state. This sounds ridiculous, but it's really the safest
-option I've run across so far.")
+option I've run across so far."))
 
 (defun animate ()
   ;; this entire idea is wrong.
@@ -98,7 +98,7 @@ option I've run across so far.")
     ;; inactive, adding each result to the active.
     ;; Any model that wants to go away can just return nil.
     (dolist (model *models*)
-      (if-let ((new-state (advance model)))
+      (if-let (new-state (advance model))
 	;; I really want to use something like push here.
 	;; What am I missing?
 	(setf altered-states (cons new-state altered-states))))
@@ -116,8 +116,7 @@ option I've run across so far.")
     ;; repl could still be ready and waiting to create a new
     ;; window.
     ;; But, this is a start.
-    (glfw:with-window (:title "Frenv" :width 800 :height 600
-			      :depthbits 16 :mode glfw:+window+)
+    (glfw:with-window (:title "Frenv" :width 800 :height 600)
       (glfw:swap-interval 1)
 
       (unwind-protect
@@ -139,7 +138,7 @@ option I've run across so far.")
   ;; environment here above everywhere else. But just to be safe:
   (bordeaux-threads:with-lock-held (*graphics-lock*)
     ;; Run stupid-loop in a second thread.
-    (setf *graphics-thread* (bordeaux-threads:makethread stupid-loop :name "graphics"))))
+    (setf *graphics-thread* (bordeaux-threads:make-thread stupid-loop :name "graphics"))))
 
 (defun stop ()
   ;; Nope. Does not work at all.
